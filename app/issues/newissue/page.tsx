@@ -11,6 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { valid } from '@/app/valid';
 import { z } from 'zod';
 import ErrorMessage from '@/app/components/ErrorMessage';
+import Spinner from '@/app/components/Spinner';
 
 type IssueForm = z.infer<typeof valid>;
 
@@ -22,6 +23,18 @@ const NewIssuePage = () => {
         resolver: zodResolver(valid)
     })
     const [error, setError] = useState('')
+    const [isSubmitting, setSubmitting] = useState(false)
+
+    const onSubmit = handleSubmit(async (data) => {
+        try {
+            setSubmitting(true);
+            await axios.post('/api/issues', data)
+            router.push('/issues');
+        } catch (error) {
+            setSubmitting(false);
+            setError('An error occurred while submitting the form')
+        }
+    })
 
     return (
         <div className='max-w-xl'>
@@ -33,14 +46,7 @@ const NewIssuePage = () => {
                 </Callout.Root>
             )}
             <form className='space-y-3'
-                onSubmit={handleSubmit(async (data) => {
-                    try {
-                        await axios.post('/api/issues', data)
-                        router.push('/issues');
-                    } catch (error) {
-                        setError('An error occurred while submitting the form')
-                    }
-                })}>
+                onSubmit={onSubmit}>
                 <TextField.Root placeholder="Title" {...register('title')}>
                 </TextField.Root>
                 <ErrorMessage>
@@ -60,7 +66,7 @@ const NewIssuePage = () => {
                 <ErrorMessage>
                     {errors.description?.message}
                 </ErrorMessage>
-                <Button >Submit</Button>
+                <Button disabled={isSubmitting}>Submit {isSubmitting && <Spinner />}</Button>
             </form >
         </div>
     )
