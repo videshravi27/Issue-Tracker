@@ -1,19 +1,15 @@
-import React from 'react';
-import { Button, Table } from '@radix-ui/themes';
-import Link from 'next/link';
-import prisma from '@/prisma/client';
-import StatusBadge from '../components/StatusBadge';
-import delay from 'delay'
-import IssueAction from './IssueAction';
+import { Table } from '@radix-ui/themes'
+import React from 'react'
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
+import IssueAction from './IssueAction'
 
-export default async function IssuesPage() {
-    const issues = await prisma.issue.findMany();
-    await delay(2000);
+const LoadingPage = async () => {
+    const issues = [1, 2, 3, 4, 5];
 
     return (
         <div>
             <IssueAction />
-
             <Table.Root variant='surface'>
                 <Table.Header>
                     <Table.Row>
@@ -24,25 +20,25 @@ export default async function IssuesPage() {
                 </Table.Header>
                 <Table.Body>
                     {issues.map(issue => (
-                        <Table.Row key={issue.id}>
+                        <Table.Row key={issue}>
                             <Table.Cell>
-                                <Link href={`/issues/${issue.id}`} className="text-sm font-medium hover:underline">
-                                    {issue.title}
-                                </Link>
+                                <Skeleton />
                                 <div className='block md:hidden'>
-                                    <StatusBadge status={issue.status} />
+                                    <Skeleton />
                                 </div>
                             </Table.Cell>
                             <Table.Cell className='hidden md:table-cell'>
-                                <StatusBadge status={issue.status} />
+                                <Skeleton />
                             </Table.Cell>
                             <Table.Cell className='hidden md:table-cell'>
-                                {issue.createdAt.toDateString()}
+                                <Skeleton />
                             </Table.Cell>
                         </Table.Row>
                     ))}
                 </Table.Body>
             </Table.Root>
         </div>
-    );
+    )
 }
+
+export default LoadingPage
