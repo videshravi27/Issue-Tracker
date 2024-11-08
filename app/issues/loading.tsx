@@ -3,7 +3,6 @@ import React from 'react'
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import IssueAction from './IssueAction'
-
 const LoadingPage = async () => {
     const issues = [1, 2, 3, 4, 5];
 
