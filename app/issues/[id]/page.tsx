@@ -1,4 +1,3 @@
-import StatusBadge from '@/app/components/StatusBadge'
 import prisma from '@/prisma/client'
 import { Box, Button, Card, Flex, Grid, Heading, Text } from '@radix-ui/themes'
 import { notFound } from 'next/navigation'

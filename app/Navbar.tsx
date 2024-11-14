@@ -27,6 +27,11 @@ const Navbar = () => {
 const NavLinks = () => {
     const currentpath = usePathname()
 
+    const links = [
+        { label: 'Dashboard', href: '/' },
+        { label: 'Issues', href: '/issues/list' },
+    ];
+
     return (
         <ul className='flex gap-5'>
             <li><Link href="/" className={`${currentpath === '/' ? 'font-extrabold' : 'font-normal'}  hover:bg-violet-300 hover:py-1 hover:rounded-md hover:px-1 transition-colors`}>Dashboard</Link></li>
