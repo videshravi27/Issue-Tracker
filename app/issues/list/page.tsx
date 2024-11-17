@@ -5,9 +5,14 @@ import { Table } from '@radix-ui/themes';
 import IssueAction from './IssueAction';
 import { Issue, Status } from '@prisma/client';
 import { ArrowUpIcon } from '@radix-ui/react-icons';
+import Pagination from '@/app/components/Pagination';
 
 interface Props {
-  searchParams: { status: Status, orderBy: keyof Issue }
+  searchParams: {
+    status: Status,
+    orderBy: keyof Issue,
+    page: string
+  }
 }
 
 const columns: { label: string, value: keyof Issue, className?: string }[] = [
@@ -27,16 +32,24 @@ const Issues = async ({ searchParams }: Props) => {
     ? { [searchParams.orderBy]: 'asc' }
     : undefined;
 
+  const where = { status }
+
+  const page = parseInt(searchParams.page) || 1;
+  const pageSize = 10;
+
   const issues = await prisma.issue.findMany({
-    where: {
-      status
-    },
-    orderBy
+    where,
+    orderBy,
+    skip: (page - 1) * pageSize,
+    take: pageSize
   });
+
+  const issueCount = await prisma.issue.count({ where });
 
   return (
     <div className='max-w-7xl'>
       <IssueAction />
+
       <Table.Root variant='surface' >
         <Table.Header>
           <Table.Row>
@@ -48,7 +61,6 @@ const Issues = async ({ searchParams }: Props) => {
                 {col.value === searchParams.orderBy && <ArrowUpIcon className='inline' />}
               </Table.ColumnHeaderCell>
             )}
-
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -60,13 +72,14 @@ const Issues = async ({ searchParams }: Props) => {
                 </Link>
                 <div className='block md:hidden'><StatusBadge status={issue.status} /></div>
               </Table.Cell>
-
               <Table.Cell className='hidden md:table-cell'><StatusBadge status={issue.status} /></Table.Cell>
               <Table.Cell className='hidden md:table-cell'>{issue.createdAt.toDateString()}</Table.Cell>
             </Table.Row>
           ))}
         </Table.Body>
       </Table.Root>
+
+      <Pagination itemCount={issueCount} pageSize={pageSize} currentPage={page} /> 
 
     </div>
   )
