@@ -1,33 +1,19 @@
-import { StatusBadge, Link } from '@/app/components'
-import NextLink from 'next/link';
-import prisma from '@/prisma/client';
-import { Table } from '@radix-ui/themes';
-import IssueAction from './IssueAction';
-import { Issue, Status } from '@prisma/client';
-import { ArrowUpIcon } from '@radix-ui/react-icons';
 import Pagination from '@/app/components/Pagination';
+import prisma from '@/prisma/client';
+import { Status } from '@prisma/client';
+import IssueAction from './IssueAction';
+import IssueTable, { columnNames, IssueQuery } from './IssueTable';
+import { Flex } from '@radix-ui/themes';
 
 interface Props {
-  searchParams: {
-    status: Status,
-    orderBy: keyof Issue,
-    page: string
-  }
+  searchParams: IssueQuery
 }
-
-const columns: { label: string, value: keyof Issue, className?: string }[] = [
-  { label: 'Issue', value: 'title' },
-  { label: 'Status', value: 'status', className: 'hidden md:table-cell' },
-  { label: 'Created', value: 'createdAt', className: 'hidden md:table-cell' }
-
-]
 
 const Issues = async ({ searchParams }: Props) => {
   const statuses = Object.values(Status)
   const status = statuses.includes(searchParams.status) ? searchParams.status : undefined;
 
-  const orderBy = columns
-    .map(col => col.value)
+  const orderBy = columnNames
     .includes(searchParams.orderBy)
     ? { [searchParams.orderBy]: 'asc' }
     : undefined;
@@ -47,41 +33,13 @@ const Issues = async ({ searchParams }: Props) => {
   const issueCount = await prisma.issue.count({ where });
 
   return (
-    <div className='max-w-7xl'>
+    <Flex direction="column" gap="3">
       <IssueAction />
 
-      <Table.Root variant='surface' >
-        <Table.Header>
-          <Table.Row>
-            {columns.map((col) =>
-              <Table.ColumnHeaderCell key={col.value} className={col.className}>
-                <NextLink href={{
-                  query: { ...searchParams, orderBy: col.value }
-                }}>{col.label}</NextLink>
-                {col.value === searchParams.orderBy && <ArrowUpIcon className='inline' />}
-              </Table.ColumnHeaderCell>
-            )}
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {issues.map(issue => (
-            <Table.Row key={issue.id}>
-              <Table.Cell>
-                <Link href={`/issues/${issue.id}`} >
-                  {issue.title}
-                </Link>
-                <div className='block md:hidden'><StatusBadge status={issue.status} /></div>
-              </Table.Cell>
-              <Table.Cell className='hidden md:table-cell'><StatusBadge status={issue.status} /></Table.Cell>
-              <Table.Cell className='hidden md:table-cell'>{issue.createdAt.toDateString()}</Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table.Root>
+      <IssueTable searchParams={searchParams} issues={issues} />
 
       <Pagination itemCount={issueCount} pageSize={pageSize} currentPage={page} /> 
-
-    </div>
+    </Flex>
   )
 }
 export const dynamic = 'force-dynamic';
